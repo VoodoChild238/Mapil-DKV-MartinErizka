@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wedding of Martin & Erizka</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts: Cinzel Decorative, Cormorant Garamond, Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        borneo: {
+                            dark: '#0A1913',      // Deep Forest Emerald
+                            card: '#11261D',      // Solid Elevated Emerald (No transparency overlap)
+                            surface: '#163025',   // Lighter Emerald Surface
+                            gold: '#D4AF37',      // Antique Dayak Brass/Gold
+                            goldLight: '#F3E5AB', // Champagne Gold
+                            terracotta: '#9E3B24',// Dayak Bead Red/Terracotta
+                            sand: '#F5F0E6',      // Warm Ivory Text
+                            muted: '#A3B5AC'      // Botanical Sage Muted
+                        }
+                    },
+                    fontFamily: {
+                        cinzel: ['"Cinzel Decorative"', 'serif'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Dayak Ethno Botanical CSS & Ornaments */
+        body {
+            background-color: #0A1913;
+            color: #F5F0E6;
+            overflow-x: hidden;
+        }
+
+        /* Lock scroll when cover is active */
+        body.modal-open {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Subtle Dayak Motif Pattern Background (Solid Base + Pattern Overlay) */
+        .bg-dayak-pattern {
+            background-color: #0A1913;
+            background-image: radial-gradient(#D4AF37 0.75px, transparent 0.75px), radial-gradient(#D4AF37 0.75px, #0A1913 0.75px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+            background-blend-mode: soft-light;
+        }
+
+        /* Gold Foil Text Effect */
+        .text-gold-gradient {
+            background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A1913;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 3px;
+        }
+
+        /* Reveal Animation on Scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Music Disc Spin */
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spinSlow 8s linear infinite;
+        }
+        .paused-spin {
+            animation-play-state: paused;
+        }
+
+        /* Ornamental Border Frame */
+        .dayak-frame {
+            position: relative;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+        .dayak-frame::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="modal-open font-sans antialiased selection:bg-borneo-gold selection:text-borneo-dark">
+
+    <!-- Background Music Audio Element -->
+    <!-- Menggunakan musik instrumental etnik/romantis bebas royalti -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=leonell-cassio-the-blackest-bouquet-118766.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Floating Audio Control Button -->
+    <button id="music-toggle" onclick="toggleMusic()" aria-label="Toggle Music"
+        class="fixed bottom-6 right-6 z-40 hidden w-12 h-12 rounded-full bg-borneo-card border-2 border-borneo-gold text-borneo-gold shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+        <i id="music-icon" class="fa-solid fa-compact-disc text-xl animate-spin-slow"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden bg-borneo-gold text-borneo-dark px-6 py-3 rounded-full font-medium text-sm shadow-2xl flex items-center gap-2 transition-all duration-300">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Tersalin ke papan klip!</span>
+    </div>
+
+    <!-- =====================================================================
+         1. COVER PEMBUKA (SOLID FULLSCREEN OVERLAY)
+    ====================================================================== -->
+    <section id="cover-overlay" class="fixed inset-0 z-50 bg-borneo-dark flex flex-col items-center justify-between p-6 text-center transition-all duration-1000 ease-in-out overflow-hidden">
+        <!-- Background Image with Solid Dark Gradient Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1600&q=80" 
+                 alt="Tropical Botanical Background" 
+                 class="w-full h-full object-cover opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-b from-borneo-dark via-borneo-dark/80 to-borneo-dark"></div>
+        </div>
+
+        <!-- Top Dayak Enggang / Hornbill & Shield SVG Ornament -->
+        <div class="relative z-10 mt-6 flex flex-col items-center">
+            <svg class="w-16 h-16 text-borneo-gold mb-2" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- Stylized Dayak Talawang & Hornbill Feather Motif -->
+                <path d="M50 5 L75 25 L75 75 L50 95 L25 75 L25 25 Z" stroke="#D4AF37" stroke-width="1.5"/>
+                <path d="M50 15 C65 30, 65 70, 50 85 C35 70, 35 30, 50 15 Z" stroke="#D4AF37" stroke-width="1.5"/>
+                <circle cx="50" cy="50" r="8" fill="#9E3B24" stroke="#D4AF37"/>
+                <path d="M25 50 Q10 35 5 20 M75 50 Q90 35 95 20" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M25 50 Q10 65 5 80 M75 50 Q90 65 95 80" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <p class="uppercase tracking-[0.35em] text-xs text-borneo-goldLight font-medium">The Wedding Celebration</p>
+        </div>
+
+        <!-- Center Couple Names -->
+        <div class="relative z-10 my-auto max-w-lg px-4">
+            <p class="font-serif italic text-lg text-borneo-muted mb-2">Together with their families</p>
+            <h1 class="font-cinzel text-4xl sm:text-6xl font-bold text-gold-gradient tracking-wider leading-tight py-2">
+                Martin <span class="block sm:inline font-serif italic font-normal text-3xl sm:text-5xl text-borneo-gold">&amp;</span> Erizka
+            </h1>
+            <div class="flex items-center justify-center gap-3 my-4">
+                <span class="h-[1px] w-12 bg-borneo-gold/50"></span>
+                <span class="text-borneo-terracotta text-xs"><i class="fa-solid fa-diamond"></i></span>
+                <span class="h-[1px] w-12 bg-borneo-gold/50"></span>
+            </div>
+            <p class="font-serif text-xl sm:text-2xl tracking-widest text-borneo-sand">MINGGU, 15 NOVEMBER 2026</p>
+        </div>
+
+        <!-- Bottom Guest Invitation Box & Open Button -->
+        <div class="relative z-10 mb-6 w-full max-w-sm bg-borneo-card border border-borneo-gold/40 rounded-2xl p-6 shadow-2xl">
+            <p class="text-xs text-borneo-muted uppercase tracking-widest mb-1">Kepada Yth. Bapak/Ibu/Saudara/i</p>
+            <h2 id="guest-name" class="font-serif text-2xl font-semibold text-borneo-goldLight mb-5">Tamu Undangan</h2>
+            
+            <button onclick="openInvitation()" 
+                class="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-[#B38728] via-[#D4AF37] to-[#AA771C] text-borneo-dark font-semibold text-sm tracking-wider uppercase shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <span>Buka Undangan</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         MAIN INVITATION CONTENT
+    ====================================================================== -->
+    <main id="main-content" class="bg-dayak-pattern relative">
+
+        <!-- HERO SECTION -->
+        <header class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden border-b border-borneo-gold/20">
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80" 
+                     alt="Wedding Hero" 
+                     class="w-full h-full object-cover opacity-25">
+                <div class="absolute inset-0 bg-gradient-to-t from-borneo-dark via-borneo-dark/60 to-borneo-dark"></div>
+            </div>
+
+            <div class="relative z-10 max-w-2xl mx-auto reveal">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-borneo-card border border-borneo-gold/40 text-borneo-gold text-xs uppercase tracking-[0.25em] mb-6">
+                    Dayak Ethno Botanical Wedding
+                </span>
+                
+                <h2 class="font-cinzel text-4xl sm:text-6xl font-bold text-gold-gradient mb-4">
+                    Martin &amp; Erizka
+                </h2>
+                
+                <p class="font-serif italic text-xl sm:text-2xl text-borneo-sand/90 max-w-xl mx-auto leading-relaxed mb-8">
+                    "Seperti akar pohon ulin yang menghujam bumi Borneo, semoga cinta kami tumbuh kokoh, abadi, dan menaungi dalam setiap musim kehidupan."
+                </p>
+
+                <!-- Countdown Timer -->
+                <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto mb-10">
+                    <div class="bg-borneo-card border border-borneo-gold/40 rounded-xl p-3 sm:p-4 shadow-lg">
+                        <span id="days" class="block font-cinzel text-2xl sm:text-3xl font-bold text-borneo-gold">00</span>
+                        <span class="text-[11px] uppercase tracking-wider text-borneo-muted">Hari</span>
+                    </div>
+                    <div class="bg-borneo-card border border-borneo-gold/40 rounded-xl p-3 sm:p-4 shadow-lg">
+                        <span id="hours" class="block font-cinzel text-2xl sm:text-3xl font-bold text-borneo-gold">00</span>
+                        <span class="text-[11px] uppercase tracking-wider text-borneo-muted">Jam</span>
+                    </div>
+                    <div class="bg-borneo-card border border-borneo-gold/40 rounded-xl p-3 sm:p-4 shadow-lg">
+                        <span id="minutes" class="block font-cinzel text-2xl sm:text-3xl font-bold text-borneo-gold">00</span>
+                        <span class="text-[11px] uppercase tracking-wider text-borneo-muted">Menit</span>
+                    </div>
+                    <div class="bg-borneo-card border border-borneo-gold/40 rounded-xl p-3 sm:p-4 shadow-lg">
+                        <span id="seconds" class="block font-cinzel text-2xl sm:text-3xl font-bold text-borneo-gold">00</span>
+                        <span class="text-[11px] uppercase tracking-wider text-borneo-muted">Detik</span>
+                    </div>
+                </div>
+
+                <a href="#mempelai" class="inline-flex flex-col items-center text-borneo-gold/80 hover:text-borneo-gold transition-colors">
+                    <span class="text-xs uppercase tracking-widest mb-2">Gulir ke Bawah</span>
+                    <i class="fa-solid fa-chevron-down animate-bounce"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- =====================================================================
+             2. PROFIL MEMPELAI PRIA & WANITA
+        ====================================================================== -->
+        <section id="mempelai" class="py-20 px-6 max-w-5xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                <p class="text-borneo-gold text-xs uppercase tracking-[0.3em] mb-2">Salam Kasih &amp; Syukur</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-borneo-sand mb-4">Mempelai Berbahagia</h2>
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                    <i class="fa-solid fa-leaf text-borneo-gold text-sm"></i>
+                    <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                </div>
+                <p class="font-serif text-lg text-borneo-muted">
+                    Dengan memohon rahmat dan berkat Tuhan Yang Maha Esa, kami bermaksud menyelenggarakan pernikahan putra-putri kami:
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <!-- Mempelai Pria -->
+                <div class="bg-borneo-card dayak-frame rounded-2xl p-8 text-center shadow-2xl reveal">
+                    <div class="relative w-44 h-44 mx-auto mb-6">
+                        <div class="absolute inset-0 rounded-full border-2 border-dashed border-borneo-gold animate-spin-slow"></div>
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" 
+                             alt="Martin" 
+                             class="w-full h-full object-cover rounded-full p-2">
+                        <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-borneo-terracotta text-borneo-sand text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-borneo-gold/50">
+                            The Groom
+                        </span>
+                    </div>
+                    <h3 class="font-cinzel text-2xl sm:text-3xl font-bold text-borneo-goldLight mb-2">Martinus Putra, S.T.</h3>
+                    <p class="font-serif italic text-lg text-borneo-sand mb-3">Putra Pertama dari</p>
+                    <p class="text-sm text-borneo-muted leading-relaxed mb-6">
+                        Bapak Yohanes Damianus &amp;<br>Ibu Maria Magdalena
+                    </p>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-borneo-surface border border-borneo-gold/40 text-borneo-gold text-xs font-medium hover:bg-borneo-gold hover:text-borneo-dark transition-all">
+                        <i class="fa-brands fa-instagram text-base"></i>
+                        <span>@martinus.putra</span>
+                    </a>
+                </div>
+
+                <!-- Mempelai Wanita -->
+                <div class="bg-borneo-card dayak-frame rounded-2xl p-8 text-center shadow-2xl reveal">
+                    <div class="relative w-44 h-44 mx-auto mb-6">
+                        <div class="absolute inset-0 rounded-full border-2 border-dashed border-borneo-gold animate-spin-slow"></div>
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" 
+                             alt="Erizka" 
+                             class="w-full h-full object-cover rounded-full p-2">
+                        <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-borneo-terracotta text-borneo-sand text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-borneo-gold/50">
+                            The Bride
+                        </span>
+                    </div>
+                    <h3 class="font-cinzel text-2xl sm:text-3xl font-bold text-borneo-goldLight mb-2">Erizka Natalia, S.E.</h3>
+                    <p class="font-serif italic text-lg text-borneo-sand mb-3">Putri Kedua dari</p>
+                    <p class="text-sm text-borneo-muted leading-relaxed mb-6">
+                        Bapak Andreas Kuncoro &amp;<br>Ibu Theresia Wulandari
+                    </p>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-borneo-surface border border-borneo-gold/40 text-borneo-gold text-xs font-medium hover:bg-borneo-gold hover:text-borneo-dark transition-all">
+                        <i class="fa-brands fa-instagram text-base"></i>
+                        <span>@erizka.natalia</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             3. DETAIL WAKTU & LOKASI ACARA
+        ====================================================================== -->
+        <section id="acara" class="py-20 px-6 bg-borneo-card/60 border-y border-borneo-gold/20">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                    <p class="text-borneo-gold text-xs uppercase tracking-[0.3em] mb-2">Save The Date</p>
+                    <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-borneo-sand mb-4">Rangkaian Acara</h2>
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                        <i class="fa-solid fa-feather-pointed text-borneo-gold text-sm"></i>
+                        <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Pemberkatan / Akad -->
+                    <div class="bg-borneo-card dayak-frame rounded-2xl p-8 text-center shadow-2xl flex flex-col justify-between reveal">
+                        <div>
+                            <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-borneo-surface border border-borneo-gold/40 flex items-center justify-center text-borneo-gold text-2xl">
+                                <i class="fa-solid fa-rings-wedding fa-heart"></i>
+                            </div>
+                            <h3 class="font-cinzel text-2xl font-bold text-borneo-goldLight mb-2">Pemberkatan Nikah</h3>
+                            <p class="text-xs uppercase tracking-widest text-borneo-terracotta font-semibold mb-6">Sacrament of Holy Matrimony</p>
+                            
+                            <div class="space-y-3 text-sm text-borneo-sand border-y border-borneo-gold/20 py-5 mb-6">
+                                <p class="flex items-center justify-center gap-2 font-medium text-base">
+                                    <i class="fa-regular fa-calendar text-borneo-gold"></i>
+                                    <span>Minggu, 15 November 2026</span>
+                                </p>
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fa-regular fa-clock text-borneo-gold"></i>
+                                    <span>Pukul 10.00 WIB - 11.30 WIB</span>
+                                </p>
+                                <p class="flex items-start justify-center gap-2 pt-2 text-borneo-muted">
+                                    <i class="fa-solid fa-location-dot text-borneo-gold mt-1"></i>
+                                    <span><strong class="text-borneo-sand block">Gereja Katedral St. Yoseph</strong>Jl. Pattimura No. 12, Pontianak / Palangka Raya</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="https://maps.google.com/?q=Gereja+Katedral+Santo+Yoseph+Pontianak" target="_blank" rel="noopener noreferrer"
+                           class="w-full py-3 px-5 rounded-full bg-borneo-surface border border-borneo-gold text-borneo-gold text-xs font-semibold uppercase tracking-wider hover:bg-borneo-gold hover:text-borneo-dark transition-all inline-flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Petunjuk Peta Google Maps</span>
+                        </a>
+                    </div>
+
+                    <!-- Resepsi Pernikahan -->
+                    <div class="bg-borneo-card dayak-frame rounded-2xl p-8 text-center shadow-2xl flex flex-col justify-between reveal">
+                        <div>
+                            <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-borneo-surface border border-borneo-gold/40 flex items-center justify-center text-borneo-gold text-2xl">
+                                <i class="fa-solid fa-champagne-glasses"></i>
+                            </div>
+                            <h3 class="font-cinzel text-2xl font-bold text-borneo-goldLight mb-2">Resepsi Pernikahan</h3>
+                            <p class="text-xs uppercase tracking-widest text-borneo-terracotta font-semibold mb-6">Wedding Reception &amp; Gawai Syukur</p>
+                            
+                            <div class="space-y-3 text-sm text-borneo-sand border-y border-borneo-gold/20 py-5 mb-6">
+                                <p class="flex items-center justify-center gap-2 font-medium text-base">
+                                    <i class="fa-regular fa-calendar text-borneo-gold"></i>
+                                    <span>Minggu, 15 November 2026</span>
+                                </p>
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fa-regular fa-clock text-borneo-gold"></i>
+                                    <span>Pukul 12.30 WIB - 15.00 WIB</span>
+                                </p>
+                                <p class="flex items-start justify-center gap-2 pt-2 text-borneo-muted">
+                                    <i class="fa-solid fa-location-dot text-borneo-gold mt-1"></i>
+                                    <span><strong class="text-borneo-sand block">Grand Borneo Botanical Ballroom</strong>Jl. Ahmad Yani No. 88, Kalimantan</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="https://maps.google.com/?q=Pontianak+Convention+Center" target="_blank" rel="noopener noreferrer"
+                           class="w-full py-3 px-5 rounded-full bg-gradient-to-r from-[#B38728] via-[#D4AF37] to-[#AA771C] text-borneo-dark text-xs font-semibold uppercase tracking-wider hover:brightness-110 transition-all inline-flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Petunjuk Peta Google Maps</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             4. GALERI FOTO PREWEDDING
+        ====================================================================== -->
+        <section id="galeri" class="py-20 px-6 max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-14 reveal">
+                <p class="text-borneo-gold text-xs uppercase tracking-[0.3em] mb-2">Our Cherished Moments</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-borneo-sand mb-4">Galeri Prewedding</h2>
+                <div class="flex items-center justify-center gap-3">
+                    <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                    <i class="fa-solid fa-camera-retro text-borneo-gold text-sm"></i>
+                    <span class="h-[1px] w-16 bg-borneo-gold/40"></span>
+                </div>
+            </div>
+
+            <!-- Masonry / Responsive Grid Gallery -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 1" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 2" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 3" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 4" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 5" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-borneo-gold/30 aspect-[3/4] cursor-pointer reveal" onclick="openLightbox(this)">
+                    <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" 
+                         alt="Prewedding 6" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-borneo-dark/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-borneo-gold text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lightbox Modal for Gallery -->
+        <div id="lightbox" class="fixed inset-0 z-50 hidden bg-borneo-dark/95 flex items-center justify-center p-4" onclick="closeLightbox()">
+            <button class="absolute top-6 right-6 text-borneo-gold text-3xl hover:scale-110 transition-transform">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Preview" class="max-h-[85vh] max-w-full rounded-xl border-2 border-borneo-gold shadow-2xl">
+        </div>
+
+        <!-- =====================================================================
+             5. AMPLOP DIGITAL / TANDA KASIH
+        ====================================================================== -->
+        <section id="amplop" class="py-20 px-6 bg-borneo-card/60 border-y border-borneo-gold/20">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="max-w-xl mx-auto mb-12 reveal">
+                    <p class="text-borneo-gold text-xs uppercase tracking-[0.3em] mb-2">Wedding Gift</p>
+                    <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-borneo-sand mb-4">Amplop Digital</h2>
+                    <p class="font-serif text-lg text-borneo-muted">
+                        Doa restu Anda merupakan karunia terindah bagi kami. Namun, apabila Bapak/Ibu/Saudara/i bermaksud memberikan tanda kasih, dapat disalurkan melalui rekening berikut:
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Bank BCA -->
+                    <div class="bg-borneo-card dayak-frame rounded-2xl p-6 text-left shadow-xl flex flex-col justify-between reveal">
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="font-bold text-xl tracking-wider text-blue-400">BCA</span>
+                            <i class="fa-solid fa-microchip text-borneo-gold text-2xl"></i>
+                        </div>
+                        <div class="mb-6">
+                            <p class="text-xs text-borneo-muted uppercase tracking-wider mb-1">Nomor Rekening</p>
+                            <p id="rek-bca" class="font-mono text-xl sm:text-2xl font-bold text-borneo-goldLight tracking-wider">8290451120</p>
+                            <p class="text-sm text-borneo-sand mt-1">a.n. Martinus Putra</p>
+                        </div>
+                        <button onclick="copyText('8290451120', 'Nomor Rekening BCA berhasil disalin!')" 
+                            class="w-full py-2.5 px-4 rounded-xl bg-borneo-surface border border-borneo-gold/50 text-borneo-gold text-xs font-semibold uppercase tracking-wider hover:bg-borneo-gold hover:text-borneo-dark transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Salin No. Rekening</span>
+                        </button>
+                    </div>
+
+                    <!-- Bank Mandiri -->
+                    <div class="bg-borneo-card dayak-frame rounded-2xl p-6 text-left shadow-xl flex flex-col justify-between reveal">
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="font-bold text-xl tracking-wider text-amber-400">MANDIRI</span>
+                            <i class="fa-solid fa-microchip text-borneo-gold text-2xl"></i>
+                        </div>
+                        <div class="mb-6">
+                            <p class="text-xs text-borneo-muted uppercase tracking-wider mb-1">Nomor Rekening</p>
+                            <p id="rek-mandiri" class="font-mono text-xl sm:text-2xl font-bold text-borneo-goldLight tracking-wider">1460009872341</p>
+                            <p class="text-sm text-borneo-sand mt-1">a.n. Erizka Natalia</p>
+                        </div>
+                        <button onclick="copyText('1460009872341', 'Nomor Rekening Mandiri berhasil disalin!')" 
+                            class="w-full py-2.5 px-4 rounded-xl bg-borneo-surface border border-borneo-gold/50 text-borneo-gold text-xs font-semibold uppercase tracking-wider hover:bg-borneo-gold hover:text-borneo-dark transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Salin No. Rekening</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QRIS Card -->
+                <div class="max-w-sm mx-auto bg-borneo-card dayak-frame rounded-2xl p-6 text-center shadow-xl reveal">
+                    <div class="inline-flex items-center gap-2 text-borneo-gold font-semibold text-sm uppercase tracking-widest mb-4">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>Scan QRIS Digital</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl w-48 h-48 mx-auto mb-4 flex items-center justify-center shadow-inner">
+                        <!-- Generated Clean QR Placeholder via QR Server API -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TheWeddingOfMartinAndErizka15Nov2026&color=0A1913" 
+                             alt="QRIS Martin & Erizka" 
+                             class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-sm font-medium text-borneo-sand">Martin &amp; Erizka Wedding</p>
+                    <p class="text-xs text-borneo-muted mt-1">Mendukung GoPay, OVO, DANA, ShopeePay &amp; Mobile Banking</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             6. FORM UCAPAN DOA & RSVP
+        ====================================================================== -->
+        <section id="rsvp" class="py-20 px-6 max-w-4xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-12 reveal">
+                <p class="text-borneo-gold text-xs uppercase tracking-[0.3em] mb-2">Wishes &amp; Confirmation</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-borneo-sand mb-4">Ucapan &amp; RSVP</h2>
+                <p class="font-serif text-lg text-borneo-muted">
+                    Konfirmasi kehadiran Anda dan tuliskan doa restu terbaik untuk kedua mempelai.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                <!-- Form Input -->
+                <div class="md:col-span-5 bg-borneo-card dayak-frame rounded-2xl p-6 shadow-2xl h-fit reveal">
+                    <form id="wishes-form" onsubmit="submitWish(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-borneo-gold mb-1.5">Nama Lengkap</label>
+                            <input type="text" id="sender-name" required placeholder="Masukkan nama Anda"
+                                class="w-full px-4 py-2.5 rounded-xl bg-borneo-dark border border-borneo-gold/30 text-borneo-sand text-sm focus:outline-none focus:border-borneo-gold">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-borneo-gold mb-1.5">Konfirmasi Kehadiran</label>
+                            <select id="attendance-status" required
+                                class="w-full px-4 py-2.5 rounded-xl bg-borneo-dark border border-borneo-gold/30 text-borneo-sand text-sm focus:outline-none focus:border-borneo-gold">
+                                <option value="Hadir">Ya, Saya Akan Hadir</option>
+                                <option value="Tidak Hadir">Maaf, Berhalangan Hadir</option>
+                                <option value="Masih Ragu">Masih Menyesuaikan Jadwal</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-borneo-gold mb-1.5">Jumlah Tamu</label>
+                            <select id="guest-count"
+                                class="w-full px-4 py-2.5 rounded-xl bg-borneo-dark border border-borneo-gold/30 text-borneo-sand text-sm focus:outline-none focus:border-borneo-gold">
+                                <option value="1 Orang">1 Orang</option>
+                                <option value="2 Orang">2 Orang</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-borneo-gold mb-1.5">Ucapan &amp; Doa Restu</label>
+                            <textarea id="wish-message" rows="3" required placeholder="Tuliskan doa terbaik untuk Martin & Erizka..."
+                                class="w-full px-4 py-2.5 rounded-xl bg-borneo-dark border border-borneo-gold/30 text-borneo-sand text-sm focus:outline-none focus:border-borneo-gold"></textarea>
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full py-3 px-6 rounded-full bg-gradient-to-r from-[#B38728] via-[#D4AF37] to-[#AA771C] text-borneo-dark font-semibold text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Kirim Ucapan</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- List Ucapan -->
+                <div class="md:col-span-7 bg-borneo-card dayak-frame rounded-2xl p-6 shadow-2xl flex flex-col reveal">
+                    <div class="flex items-center justify-between border-b border-borneo-gold/20 pb-4 mb-4">
+                        <h3 class="font-serif text-xl font-semibold text-borneo-goldLight">Doa &amp; Harapan Sahabat</h3>
+                        <span id="wish-counter" class="text-xs bg-borneo-surface text-borneo-gold px-3 py-1 rounded-full border border-borneo-gold/30">3 Ucapan</span>
+                    </div>
+
+                    <div id="wishes-list" class="space-y-4 max-h-[420px] overflow-y-auto pr-2">
+                        <!-- Sample Wish 1 -->
+                        <div class="bg-borneo-dark/80 border border-borneo-gold/20 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <h4 class="font-semibold text-sm text-borneo-goldLight">Keluarga Besar Bpk. Hendra</h4>
+                                <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-500/30">
+                                    <i class="fa-solid fa-check mr-1"></i>Hadir (2 Orang)
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-borneo-sand/90 leading-relaxed">
+                                Selamat menempuh hidup baru Martin &amp; Erizka! Semoga Tuhan senantiasa memberkati rumah tangga kalian dengan sukacita, kesetiaan, dan damai sejahtera hingga maut memisahkan.
+                            </p>
+                            <span class="block text-[10px] text-borneo-muted mt-2"><i class="fa-regular fa-clock mr-1"></i>Baru saja</span>
+                        </div>
+
+                        <!-- Sample Wish 2 -->
+                        <div class="bg-borneo-dark/80 border border-borneo-gold/20 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <h4 class="font-semibold text-sm text-borneo-goldLight">Clarissa &amp; Partner</h4>
+                                <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-500/30">
+                                    <i class="fa-solid fa-check mr-1"></i>Hadir (2 Orang)
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-borneo-sand/90 leading-relaxed">
+                                Happy wedding Erizka sayang dan Martin! Lancar-lancar sampai hari H ya, nggak sabar ketemu di resepsi!
+                            </p>
+                            <span class="block text-[10px] text-borneo-muted mt-2"><i class="fa-regular fa-clock mr-1"></i>2 jam yang lalu</span>
+                        </div>
+
+                        <!-- Sample Wish 3 -->
+                        <div class="bg-borneo-dark/80 border border-borneo-gold/20 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <h4 class="font-semibold text-sm text-borneo-goldLight">Daniel Wijaya</h4>
+                                <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-500/30">
+                                    Berhalangan Hadir
+                                </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-borneo-sand/90 leading-relaxed">
+                                Selamat berbahagia bro Martin dan Erizka! Mohon maaf belum bisa hadir langsung karena tugas luar kota, doa terbaik menyertai keluarga baru kalian.
+                            </p>
+                            <span class="block text-[10px] text-borneo-muted mt-2"><i class="fa-regular fa-clock mr-1"></i>1 hari yang lalu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             FOOTER
+        ====================================================================== -->
+        <footer class="bg-borneo-dark border-t border-borneo-gold/30 py-14 px-6 text-center">
+            <div class="max-w-lg mx-auto">
+                <p class="font-serif italic text-lg text-borneo-muted mb-4">
+                    Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.
+                </p>
+                <h2 class="font-cinzel text-3xl font-bold text-gold-gradient mb-2">Martin &amp; Erizka</h2>
+                <p class="text-xs uppercase tracking-[0.3em] text-borneo-gold mb-8">15 . 11 . 2026</p>
+                <p class="text-[11px] text-borneo-muted/60">
+                    Crafted with Love &bull; Dayak Ethno Botanical Edition
+                </p>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- =====================================================================
+         JAVASCRIPT INTERACTIVITY
+    ====================================================================== -->
+    <script>
+        // 1. Parse URL Parameter for Guest Name (?to=Nama+Tamu)
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const guest = urlParams.get('to');
+            if (guest && guest.trim() !== '') {
+                document.getElementById('guest-name').textContent = guest;
+                document.getElementById('sender-name').value = guest;
+            }
+            initScrollReveal();
+        });
+
+        // 2. Open Invitation & Auto-play Background Music
+        const audio = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-toggle');
+        const musicIcon = document.getElementById('music-icon');
+        let isPlaying = false;
+
+        function openInvitation() {
+            const cover = document.getElementById('cover-overlay');
+            cover.style.transform = 'translateY(-100%)';
+            cover.style.opacity = '0';
+            
+            document.body.classList.remove('modal-open');
+            musicBtn.classList.remove('hidden');
+
+            // Play Audio
+            audio.play().then(() => {
+                isPlaying = true;
+                musicIcon.classList.remove('paused-spin');
+            }).catch((err) => {
+                console.log('Autoplay dicegah browser, klik tombol musik untuk memutar.', err);
+                isPlaying = false;
+                musicIcon.classList.add('paused-spin');
+            });
+
+            // Remove cover from DOM flow after transition
+            setTimeout(() => {
+                cover.style.display = 'none';
+            }, 1000);
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                musicIcon.classList.add('paused-spin');
+                isPlaying = false;
+            } else {
+                audio.play();
+                musicIcon.classList.remove('paused-spin');
+                isPlaying = true;
+            }
+        }
+
+        // 3. Countdown Timer menuju Minggu, 15 November 2026, 10:00:00 WIB
+        const weddingDate = new Date('November 15, 2026 10:00:00').getTime();
+
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }, 1000);
+
+        // 4. Copy Account Number & Toast Notification
+        function copyText(text, message) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(message);
+            }).catch(() => {
+                // Fallback for older mobile browsers
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast(message);
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 5. Interactive RSVP & Wishes Submission
+        let wishCount = 3;
+        function submitWish(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('sender-name').value.trim();
+            const status = document.getElementById('attendance-status').value;
+            const count = document.getElementById('guest-count').value;
+            const message = document.getElementById('wish-message').value.trim();
+
+            if (!name || !message) return;
+
+            const badgeHTML = status === 'Hadir'
+                ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-500/30"><i class="fa-solid fa-check mr-1"></i>Hadir (${count})</span>`
+                : `<span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-500/30">${status}</span>`;
+
+            const wishItem = document.createElement('div');
+            wishItem.className = 'bg-borneo-dark/80 border border-borneo-gold/40 rounded-xl p-4 transition-all duration-500';
+            wishItem.innerHTML = `
+                <div class="flex items-center justify-between mb-1.5">
+                    <h4 class="font-semibold text-sm text-borneo-goldLight">${escapeHTML(name)}</h4>
+                    ${badgeHTML}
+                </div>
+                <p class="text-xs sm:text-sm text-borneo-sand/90 leading-relaxed">${escapeHTML(message)}</p>
+                <span class="block text-[10px] text-borneo-gold mt-2"><i class="fa-regular fa-clock mr-1"></i>Baru saja</span>
+            `;
+
+            const list = document.getElementById('wishes-list');
+            list.insertBefore(wishItem, list.firstChild);
+
+            wishCount++;
+            document.getElementById('wish-counter').textContent = `${wishCount} Ucapan`;
+
+            // Reset message field & notify
+            document.getElementById('wish-message').value = '';
+            showToast('Terima kasih! Ucapan & RSVP Anda telah terkirim.');
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag]));
+        }
+
+        // 6. Gallery Lightbox
+        function openLightbox(el) {
+            const imgSrc = el.querySelector('img').src;
+            document.getElementById('lightbox-img').src = imgSrc;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        // 7. Scroll Reveal Intersection Observer
+        function initScrollReveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            reveals.forEach(el => observer.observe(el));
+        }
+    </script>
+</body>
+      </html>
